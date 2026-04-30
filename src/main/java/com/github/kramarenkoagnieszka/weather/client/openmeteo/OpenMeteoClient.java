@@ -1,25 +1,22 @@
-package com.github.kramarenkoagnieszka.weather.client;
+package com.github.kramarenkoagnieszka.weather.client.openmeteo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.kramarenkoagnieszka.weather.client.WeatherClient;
 import com.github.kramarenkoagnieszka.weather.exception.WeatherClientException;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
 
 public class OpenMeteoClient implements WeatherClient {
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    public OpenMeteoClient() {
-        // Ustawiamy timeout, żeby program nie wisiał w nieskończoność
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
-                .build();
-        this.objectMapper = new ObjectMapper();
+    public OpenMeteoClient(HttpClient httpClient, ObjectMapper objectMapper) {
+        this.httpClient = httpClient;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -58,7 +55,6 @@ public class OpenMeteoClient implements WeatherClient {
             Thread.currentThread().interrupt();
             throw new WeatherClientException("Weather request was interrupted", e);
         } catch (Exception e) {
-            // Tu wpadają wszystkie błędy sieciowe i błędy parsowania JSON
             throw new WeatherClientException("Unexpected error while fetching weather data", e);
         }
     }

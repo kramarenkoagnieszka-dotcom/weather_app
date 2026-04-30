@@ -1,4 +1,4 @@
-package com.github.kramarenkoagnieszka.weather.client;
+package com.github.kramarenkoagnieszka.weather.client.openmeteo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OpenMeteoResponse {
+class OpenMeteoResponse {
 
     @JsonProperty("current")
     private CurrentWeather current;

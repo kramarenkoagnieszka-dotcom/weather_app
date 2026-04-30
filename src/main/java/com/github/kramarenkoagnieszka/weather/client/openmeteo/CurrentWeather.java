@@ -1,4 +1,4 @@
-package com.github.kramarenkoagnieszka.weather.client;
+package com.github.kramarenkoagnieszka.weather.client.openmeteo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

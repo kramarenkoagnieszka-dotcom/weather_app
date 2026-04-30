@@ -1,4 +1,4 @@
-package com.github.kramarenkoagnieszka.weather;
+package com.github.kramarenkoagnieszka.weather.client;
 
 import com.github.kramarenkoagnieszka.weather.exception.WeatherClientException;
 
