@@ -1,4 +1,4 @@
-package com.github.kramarenkoagnieszka.weather;
+package com.github.kramarenkoagnieszka.weather.model;
 
 import lombok.Builder;
 import lombok.Data;
