@@ -18,9 +18,12 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
         AWSContext.getLogger().log("Processing weather request...");
 
         try {
-            String cityName = input.getOrDefault("city", "WROCLAW").toString().toUpperCase();
-            City city = City.valueOf(cityName);
+            String cityName = "WROCLAW";
+            if (input != null && input.containsKey("city")) {
+                cityName = input.get("city").toString().toUpperCase();
+            }
 
+            City city = City.valueOf(cityName);
             WeatherService weatherService = APP_CONTEXT.getWeatherService();
             return weatherService.getWeather(city);
 
