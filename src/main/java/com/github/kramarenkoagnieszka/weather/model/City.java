@@ -28,8 +28,10 @@ public enum City {
     if (cityName == null) {
       return Optional.empty();
     }
+    String normalizedName = cityName.trim().replace(" ", "_");
+
     return Arrays.stream(City.values())
-        .filter(city -> city.name().equalsIgnoreCase(cityName.replace(" ", "_")))
+        .filter(city -> city.name().equalsIgnoreCase(normalizedName))
         .findFirst();
   }
 }
