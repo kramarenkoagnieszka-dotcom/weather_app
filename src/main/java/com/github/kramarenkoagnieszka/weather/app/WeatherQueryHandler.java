@@ -2,10 +2,11 @@ package com.github.kramarenkoagnieszka.weather.app;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.github.kramarenkoagnieszka.weather.exception.InvalidCityException;
+import com.github.kramarenkoagnieszka.weather.exception.MissingParameterException;
 import com.github.kramarenkoagnieszka.weather.exception.WeatherApplicationException;
 import com.github.kramarenkoagnieszka.weather.model.City;
 import com.github.kramarenkoagnieszka.weather.model.WeatherResponse;
-import com.github.kramarenkoagnieszka.weather.service.WeatherService;
 
 import java.util.Map;
 
@@ -18,24 +19,26 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
     awsContext.getLogger().log("Processing weather request...");
 
     try {
-      String cityName = "WROCLAW";
-      if (input != null && input.containsKey("city")) {
-        cityName = input.get("city").toString().toUpperCase();
+      if (input == null || !input.containsKey("city") || input.get("city") == null) {
+        throw new MissingParameterException("Missing required parameter: 'city'");
       }
 
-      City city = City.valueOf(cityName);
-      WeatherService weatherService = APP_CONTEXT.getWeatherService();
-      return weatherService.getWeather(city);
+      String cityName = input.get("city").toString();
 
-    } catch (IllegalArgumentException e) {
-      awsContext.getLogger().log("Invalid city: " + e.getMessage());
-      throw new RuntimeException("Error: City not supported. Supported: WROCLAW, WARSAW.");
+      City city = City.fromString(cityName)
+          .orElseThrow(() -> new InvalidCityException("City not supported: " + cityName));
+
+      return APP_CONTEXT.getWeatherService().getWeather(city);
+
+    } catch (MissingParameterException | InvalidCityException e) {
+      awsContext.getLogger().log("Validation error: " + e.getMessage());
+      throw new RuntimeException("400 Bad Request: " + e.getMessage());
     } catch (WeatherApplicationException e) {
-      awsContext.getLogger().log("Weather app error: " + e.getMessage());
-      throw new RuntimeException("Service Error: Could not process weather data.", e);
+      awsContext.getLogger().log("Service error: " + e.getMessage());
+      throw new RuntimeException("500 Service Error: " + e.getMessage());
     } catch (Exception e) {
-      awsContext.getLogger().log("Unexpected system error: " + e.getMessage());
-      throw new RuntimeException("Internal Server Error.", e);
+      awsContext.getLogger().log("Fatal error: " + e.getMessage());
+      throw new RuntimeException("500 Internal Server Error");
     }
   }
-}
+  }
