@@ -14,7 +14,7 @@ public class WeatherService {
 
     public WeatherResponse getWeather(City city) throws WeatherApplicationException {
         try {
-            double temp = weatherClient.getTemperature(city.getLatitude(), city.getLongitude());
+            double temp = weatherClient.getTemperature(city);
 
             return WeatherResponse.builder()
                     .city(city)

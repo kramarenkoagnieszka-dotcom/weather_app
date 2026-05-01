@@ -3,6 +3,7 @@ package com.github.kramarenkoagnieszka.weather.client.openmeteo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kramarenkoagnieszka.weather.client.WeatherClient;
 import com.github.kramarenkoagnieszka.weather.exception.WeatherClientException;
+import com.github.kramarenkoagnieszka.weather.model.City;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -20,10 +21,12 @@ public class OpenMeteoClient implements WeatherClient {
     }
 
     @Override
-    public double getTemperature(double lat, double lon) throws WeatherClientException {
+    public double getTemperature(City city) throws WeatherClientException {
+        // Klient sam wyciąga współrzędne z Enuma City
         String url = String.format(
                 "https://api.open-meteo.com/v1/forecast?latitude=%.2f&longitude=%.2f&current=temperature_2m",
-                lat, lon);
+                city.getLatitude(),
+                city.getLongitude());
 
         try {
             HttpRequest request = HttpRequest.newBuilder()
