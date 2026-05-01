@@ -10,20 +10,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WeatherService {
 
-    private final WeatherClient weatherClient;
-    private final TemperatureClassifier classifier;
+  private final WeatherClient weatherClient;
+  private final TemperatureClassifier classifier;
 
-    public WeatherResponse getWeather(City city) throws WeatherApplicationException {
-        try {
-            double temp = weatherClient.getTemperature(city);
+  public WeatherResponse getWeather(City city) throws WeatherApplicationException {
+    try {
+      double temp = weatherClient.getTemperature(city);
 
-            return WeatherResponse.builder()
-                    .city(city)
-                    .temperature(temp)
-                    .category(classifier.classify(temp))
-                    .build();
-        }catch (WeatherClientException e) {
-            throw new WeatherApplicationException("Failed to fetch weather due to API error for " + city.getDisplayName(), e);
-        }
+      return WeatherResponse.builder()
+          .city(city)
+          .temperature(temp)
+          .category(classifier.classify(temp))
+          .build();
+    } catch (WeatherClientException e) {
+      throw new WeatherApplicationException(
+          "Failed to fetch weather due to API error for " + city.getDisplayName(), e);
     }
+  }
 }

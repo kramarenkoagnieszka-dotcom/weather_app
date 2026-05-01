@@ -8,6 +8,6 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrentWeather {
 
-    @JsonProperty("temperature_2m")
-    private double temperature;
+  @JsonProperty("temperature_2m")
+  private double temperature;
 }

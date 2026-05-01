@@ -6,13 +6,14 @@ import lombok.Data;
 @Data
 @Builder
 public class WeatherResponse {
-    public static final String DEFAULT_UNIT = "Celsius";
 
-    private City city;
-    private double temperature;
+  public static final String DEFAULT_UNIT = "Celsius";
 
-    @Builder.Default
-    private String unit = DEFAULT_UNIT;
+  private City city;
+  private double temperature;
 
-    private TemperatureCategory category;
+  @Builder.Default
+  private String unit = DEFAULT_UNIT;
+
+  private TemperatureCategory category;
 }

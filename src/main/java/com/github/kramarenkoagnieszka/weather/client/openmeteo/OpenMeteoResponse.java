@@ -8,6 +8,6 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 class OpenMeteoResponse {
 
-    @JsonProperty("current")
-    private CurrentWeather current;
+  @JsonProperty("current")
+  private CurrentWeather current;
 }

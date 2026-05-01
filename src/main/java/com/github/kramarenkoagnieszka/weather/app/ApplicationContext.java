@@ -13,23 +13,24 @@ import java.time.Duration;
 
 @Getter
 public class ApplicationContext {
-    private static final long HTTP_CONNECT_TIMEOUT_SECONDS = 10L;
 
-    private final ObjectMapper objectMapper;
-    private final HttpClient httpClient;
-    private final WeatherClient weatherClient;
-    private final TemperatureClassifier temperatureClassifier;
-    private final WeatherService weatherService;
+  private static final long HTTP_CONNECT_TIMEOUT_SECONDS = 10L;
 
-    public ApplicationContext() {
-        this.objectMapper = new ObjectMapper();
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(HTTP_CONNECT_TIMEOUT_SECONDS))
-                .build();
+  private final ObjectMapper objectMapper;
+  private final HttpClient httpClient;
+  private final WeatherClient weatherClient;
+  private final TemperatureClassifier temperatureClassifier;
+  private final WeatherService weatherService;
 
-        this.weatherClient = new OpenMeteoClient(httpClient, objectMapper);
-        this.temperatureClassifier = new TemperatureClassifier();
+  public ApplicationContext() {
+    this.objectMapper = new ObjectMapper();
+    this.httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(HTTP_CONNECT_TIMEOUT_SECONDS))
+        .build();
 
-        this.weatherService = new WeatherService(weatherClient, temperatureClassifier);
-    }
+    this.weatherClient = new OpenMeteoClient(httpClient, objectMapper);
+    this.temperatureClassifier = new TemperatureClassifier();
+
+    this.weatherService = new WeatherService(weatherClient, temperatureClassifier);
+  }
 }
