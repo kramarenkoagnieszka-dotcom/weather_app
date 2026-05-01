@@ -22,7 +22,6 @@ public class OpenMeteoClient implements WeatherClient {
 
     @Override
     public double getTemperature(City city) throws WeatherClientException {
-        // Klient sam wyciąga współrzędne z Enuma City
         String url = String.format(
                 "https://api.open-meteo.com/v1/forecast?latitude=%.2f&longitude=%.2f&current=temperature_2m",
                 city.getLatitude(),

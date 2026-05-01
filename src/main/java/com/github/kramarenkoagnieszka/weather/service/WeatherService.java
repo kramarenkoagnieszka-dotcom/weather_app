@@ -2,6 +2,7 @@ package com.github.kramarenkoagnieszka.weather.service;
 
 import com.github.kramarenkoagnieszka.weather.client.WeatherClient;
 import com.github.kramarenkoagnieszka.weather.exception.WeatherApplicationException;
+import com.github.kramarenkoagnieszka.weather.exception.WeatherClientException;
 import com.github.kramarenkoagnieszka.weather.model.City;
 import com.github.kramarenkoagnieszka.weather.model.WeatherResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,8 @@ public class WeatherService {
                     .temperature(temp)
                     .category(classifier.classify(temp))
                     .build();
-        } catch (Exception e) {
-            throw new WeatherApplicationException("Failed to fetch weather for " + city.getDisplayName(), e);
+        }catch (WeatherClientException e) {
+            throw new WeatherApplicationException("Failed to fetch weather due to API error for " + city.getDisplayName(), e);
         }
     }
 }
