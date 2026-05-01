@@ -18,7 +18,7 @@ public class WeatherService {
       double temp = weatherClient.getTemperature(city);
 
       return WeatherResponse.builder()
-          .city(city)
+          .city(city.getDisplayName()) // Tutaj przekazujesz "Wroclaw"
           .temperature(temp)
           .category(classifier.classify(temp))
           .build();

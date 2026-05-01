@@ -9,7 +9,7 @@ public class WeatherResponse {
 
   public static final String DEFAULT_UNIT = "Celsius";
 
-  private City city;
+  private String city;
   private double temperature;
 
   @Builder.Default
