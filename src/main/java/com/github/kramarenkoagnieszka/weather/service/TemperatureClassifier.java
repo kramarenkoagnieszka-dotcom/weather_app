@@ -1,4 +1,4 @@
-package com.github.kramarenkoagnieszka.weather;
+package com.github.kramarenkoagnieszka.weather.service;
 
 import com.github.kramarenkoagnieszka.weather.model.TemperatureCategory;
 

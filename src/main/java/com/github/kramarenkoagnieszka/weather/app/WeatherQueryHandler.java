@@ -1,9 +1,10 @@
-package com.github.kramarenkoagnieszka.weather;
+package com.github.kramarenkoagnieszka.weather.app;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.github.kramarenkoagnieszka.weather.model.City;
 import com.github.kramarenkoagnieszka.weather.model.WeatherResponse;
+import com.github.kramarenkoagnieszka.weather.service.WeatherService;
 
 import java.util.Map;
 

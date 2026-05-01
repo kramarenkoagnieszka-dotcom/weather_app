@@ -1,9 +1,11 @@
-package com.github.kramarenkoagnieszka.weather;
+package com.github.kramarenkoagnieszka.weather.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kramarenkoagnieszka.weather.client.WeatherClient;
 import com.github.kramarenkoagnieszka.weather.client.openmeteo.OpenMeteoClient;
 
+import com.github.kramarenkoagnieszka.weather.service.TemperatureClassifier;
+import com.github.kramarenkoagnieszka.weather.service.WeatherService;
 import lombok.Getter;
 
 import java.net.http.HttpClient;

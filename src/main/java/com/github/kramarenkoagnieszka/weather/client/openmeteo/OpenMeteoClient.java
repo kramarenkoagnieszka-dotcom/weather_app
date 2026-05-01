@@ -21,30 +21,24 @@ public class OpenMeteoClient implements WeatherClient {
 
     @Override
     public double getTemperature(double lat, double lon) throws WeatherClientException {
-        // Budujemy URL zgodnie z tym, co sprawdziłaś w przeglądarce
         String url = String.format(
                 "https://api.open-meteo.com/v1/forecast?latitude=%.2f&longitude=%.2f&current=temperature_2m",
                 lat, lon);
 
         try {
-            // 1. Przygotowanie zapytania
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
                     .build();
 
-            // 2. Wysłanie zapytania i odebranie odpowiedzi jako String
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Sprawdzamy, czy serwer nie zwrócił błędu (np. 404 lub 500)
             if (response.statusCode() != 200) {
                 throw new WeatherClientException("Open-Meteo returned error code: " + response.statusCode(), null);
             }
 
-            // 3. Mapowanie JSON na Twoje klasy DTO
             OpenMeteoResponse data = objectMapper.readValue(response.body(), OpenMeteoResponse.class);
 
-            // 4. Wyciągnięcie temperatury z "pudełek"
             if (data.getCurrent() == null) {
                 throw new WeatherClientException("Invalid response: 'current' data is missing", null);
             }
