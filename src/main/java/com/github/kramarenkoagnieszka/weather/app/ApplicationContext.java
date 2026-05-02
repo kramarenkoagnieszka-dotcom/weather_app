@@ -1,8 +1,11 @@
 package com.github.kramarenkoagnieszka.weather.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.kramarenkoagnieszka.weather.client.WeatherClient;
-import com.github.kramarenkoagnieszka.weather.client.openmeteo.OpenMeteoClient;
+import com.github.kramarenkoagnieszka.weather.client.GeocodingClient;
+import com.github.kramarenkoagnieszka.weather.client.HttpClientWrapper;
+import com.github.kramarenkoagnieszka.weather.client.OpenMeteoGeocodingClient;
+import com.github.kramarenkoagnieszka.weather.client.OpenMeteoWeatherClient;
+import com.github.kramarenkoagnieszka.weather.client.TemperatureClient;
 
 import com.github.kramarenkoagnieszka.weather.service.TemperatureClassifier;
 import com.github.kramarenkoagnieszka.weather.service.WeatherService;
@@ -14,23 +17,23 @@ import java.time.Duration;
 @Getter
 public class ApplicationContext {
 
-  private static final long HTTP_CONNECT_TIMEOUT_SECONDS = 10L;
-
   private final ObjectMapper objectMapper;
   private final HttpClient httpClient;
-  private final WeatherClient weatherClient;
+  private final HttpClientWrapper httpClientWrapper;
+  private final TemperatureClient temperatureClient;
+  private final GeocodingClient geocodingClient;
   private final TemperatureClassifier temperatureClassifier;
   private final WeatherService weatherService;
 
   public ApplicationContext() {
     this.objectMapper = new ObjectMapper();
     this.httpClient = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofSeconds(HTTP_CONNECT_TIMEOUT_SECONDS))
+        .connectTimeout(Duration.ofSeconds(AppConfig.HTTP_CONNECT_TIMEOUT_SECONDS))
         .build();
-
-    this.weatherClient = new OpenMeteoClient(httpClient, objectMapper);
+    this.httpClientWrapper = new HttpClientWrapper(httpClient);
+    this.temperatureClient = new OpenMeteoWeatherClient(httpClientWrapper, objectMapper);
+    this.geocodingClient = new OpenMeteoGeocodingClient(httpClientWrapper, objectMapper);
     this.temperatureClassifier = new TemperatureClassifier();
-
-    this.weatherService = new WeatherService(weatherClient, temperatureClassifier);
+    this.weatherService = new WeatherService(geocodingClient, temperatureClient, temperatureClassifier);
   }
 }

@@ -1,6 +1,6 @@
 package com.github.kramarenkoagnieszka.weather.exception;
 
-public class WeatherApplicationException extends Exception {
+public class WeatherApplicationException extends RuntimeException {
 
   public WeatherApplicationException(String message) {
     super(message);
