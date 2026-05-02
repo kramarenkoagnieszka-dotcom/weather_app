@@ -9,6 +9,7 @@ import com.github.kramarenkoagnieszka.weather.exception.WeatherClientException;
 import com.github.kramarenkoagnieszka.weather.model.CityRequest;
 import com.github.kramarenkoagnieszka.weather.model.WeatherResponse;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, WeatherResponse> {
@@ -20,7 +21,7 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
     validateInput(input);
 
     return executeSafely(awsContext, () -> {
-      Map<String, String> queryParams = (Map<String, String>) input.get("queryStringParameters");
+      Map<String, String> queryParams = extractQueryParams(input);
       String cityName = queryParams.get("city");
 
       CityRequest cityRequest = new CityRequest(cityName);
@@ -32,7 +33,6 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
     if (input == null) {
       throw new MissingParameterException("Input cannot be null");
     }
-
     Map<String, String> queryParams = (Map<String, String>) input.get("queryStringParameters");
 
     if (queryParams == null ||
@@ -42,6 +42,15 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
       throw new MissingParameterException("Missing required GET query parameter: 'city'");
     }
   }
+
+  private Map<String, String> extractQueryParams(Map<String, Object> input) {
+    Object raw = input.get("queryStringParameters");
+    if (!(raw instanceof Map)) {
+      return Collections.emptyMap();
+    }
+    return (Map<String, String>) raw;
+  }
+
 
   private WeatherResponse executeSafely(Context context, WeatherAction action) {
     try {
@@ -54,8 +63,8 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
       context.getLogger().log("Geocoding service error: " + e.getMessage());
       throw new WeatherApplicationException("500 Geocoding Service Error: " + e.getMessage(), e);
     } catch (WeatherClientException e) {
-        context.getLogger().log("Weather service error: " + e.getMessage());
-        throw new WeatherApplicationException("500 Weather Service Error: " + e.getMessage(), e);
+      context.getLogger().log("Weather service error: " + e.getMessage());
+      throw new WeatherApplicationException("500 Weather Service Error: " + e.getMessage(), e);
     } catch (WeatherApplicationException e) {
       context.getLogger().log("Service error: " + e.getMessage());
       throw new WeatherApplicationException("500 Service Error: " + e.getMessage(), e);
@@ -67,6 +76,7 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
 
   @FunctionalInterface
   private interface WeatherAction {
+
     WeatherResponse execute() throws Exception;
   }
 }

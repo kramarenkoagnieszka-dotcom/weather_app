@@ -1,18 +1,16 @@
 package com.github.kramarenkoagnieszka.weather.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class WeatherResponse {
 
-  private String city;
-  private double temperature;
-  private Unit unit;
-  private TemperatureCategory category;
+  private final String city;
+  private final double temperature;
+  private final Unit unit;
+  private final TemperatureCategory category;
 
-  public WeatherResponse (String city, double temperature, TemperatureCategory category){
+  public WeatherResponse(String city, double temperature, TemperatureCategory category) {
     this.city = city;
     this.temperature = temperature;
     this.category = category;

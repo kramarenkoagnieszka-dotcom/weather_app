@@ -9,8 +9,10 @@ import com.github.kramarenkoagnieszka.weather.model.CityRequest;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 
 public class OpenMeteoGeocodingClient implements GeocodingClient {
 
@@ -40,7 +42,8 @@ public class OpenMeteoGeocodingClient implements GeocodingClient {
     }
 
     if (response.statusCode() != 200) {
-      throw new GeocodingClientException("Unexpected Geocoding API error. Status: " + response.statusCode());
+      throw new GeocodingClientException(
+          "Unexpected Geocoding API error. Status: " + response.statusCode());
     }
 
     JsonNode root = parseJson(response.body());
@@ -69,7 +72,8 @@ public class OpenMeteoGeocodingClient implements GeocodingClient {
   }
 
   private HttpResponse<String> fetchRawData(CityRequest cityRequest) {
-    String url = String.format(GEO_URL, cityRequest.getName().replace(" ", "%20"));
+    String encodedCity = URLEncoder.encode(cityRequest.getName(), StandardCharsets.UTF_8);
+    String url = String.format(GEO_URL, encodedCity);
 
     HttpRequest request = HttpRequest.newBuilder()
         .uri(URI.create(url))

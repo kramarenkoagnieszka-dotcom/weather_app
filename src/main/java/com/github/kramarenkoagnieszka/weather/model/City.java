@@ -1,12 +1,11 @@
 package com.github.kramarenkoagnieszka.weather.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Value;
 
-@Data
-@AllArgsConstructor
+@Value
 public class City {
-  private String displayName;
-  private double latitude;
-  private double longitude;
+
+  String displayName;
+  double latitude;
+  double longitude;
 }

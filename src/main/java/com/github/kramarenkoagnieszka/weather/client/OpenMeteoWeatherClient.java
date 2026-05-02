@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Locale;
 
 public class OpenMeteoWeatherClient implements TemperatureClient {
 
@@ -33,20 +34,22 @@ public class OpenMeteoWeatherClient implements TemperatureClient {
 
     if (temperatureNode.isMissingNode()) {
       throw new WeatherClientException(
-          String.format("Invalid response: '%s.%s' data is missing", NODE_CURRENT, NODE_TEMPERATURE));
+          String.format("Invalid response: '%s.%s' data is missing", NODE_CURRENT,
+              NODE_TEMPERATURE));
     }
     return temperatureNode.asDouble();
   }
 
   private JsonNode fetchData(City city) {
-    String url = String.format(OPEN_METEO_URL, city.getLatitude(), city.getLongitude());
+    String url = String.format(Locale.US, OPEN_METEO_URL, city.getLatitude(), city.getLongitude());
 
     HttpRequest request = HttpRequest.newBuilder()
         .uri(URI.create(url))
         .GET()
         .build();
 
-    HttpResponse<String> response = httpClientWrapper.sendWithRetry(request, AppConfig.DEFAULT_RETRIES);
+    HttpResponse<String> response = httpClientWrapper.sendWithRetry(request,
+        AppConfig.DEFAULT_RETRIES);
 
     if (response.statusCode() != 200) {
       throw new WeatherClientException("Open-Meteo returned error code: " + response.statusCode());

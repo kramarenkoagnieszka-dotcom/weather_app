@@ -34,6 +34,7 @@ public class ApplicationContext {
     this.temperatureClient = new OpenMeteoWeatherClient(httpClientWrapper, objectMapper);
     this.geocodingClient = new OpenMeteoGeocodingClient(httpClientWrapper, objectMapper);
     this.temperatureClassifier = new TemperatureClassifier();
-    this.weatherService = new WeatherService(geocodingClient, temperatureClient, temperatureClassifier);
+    this.weatherService = new WeatherService(geocodingClient, temperatureClient,
+        temperatureClassifier);
   }
 }
