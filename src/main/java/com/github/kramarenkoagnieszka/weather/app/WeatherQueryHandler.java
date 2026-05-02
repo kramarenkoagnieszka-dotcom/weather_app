@@ -17,18 +17,29 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
 
   @Override
   public WeatherResponse handleRequest(Map<String, Object> input, Context awsContext) {
+    validateInput(input);
 
     return executeSafely(awsContext, () -> {
-      validateInput(input);
-      String cityName = input.get("city").toString();
+      Map<String, String> queryParams = (Map<String, String>) input.get("queryStringParameters");
+      String cityName = queryParams.get("city");
+
       CityRequest cityRequest = new CityRequest(cityName);
       return APP_CONTEXT.getWeatherService().getWeather(cityRequest);
     });
   }
 
   private void validateInput(Map<String, Object> input) {
-    if (input == null || !input.containsKey("city") || input.get("city") == null) {
-      throw new MissingParameterException("Missing required parameter: 'city'");
+    if (input == null) {
+      throw new MissingParameterException("Input cannot be null");
+    }
+
+    Map<String, String> queryParams = (Map<String, String>) input.get("queryStringParameters");
+
+    if (queryParams == null ||
+        !queryParams.containsKey("city") ||
+        queryParams.get("city") == null ||
+        queryParams.get("city").isBlank()) {
+      throw new MissingParameterException("Missing required GET query parameter: 'city'");
     }
   }
 
