@@ -1,34 +1,82 @@
-# Weather Classification Lambda
+# Weather Temperature Service (AWS Lambda)
 
-A professional, serverless AWS Lambda function built with Java 21 that fetches real-time weather data and classifies temperatures into human-readable categories.
+A professional, serverless AWS Lambda function built with **Java 21** that fetches real-time weather data for any city and classifies temperatures into human-readable categories.
 
-## 🚀 Solution Description
-The application retrieves current weather data from the **Open-Meteo API** and applies a business logic layer to categorize the temperature. The project is designed with high scalability and maintainability in mind, following SOLID principles.
+## 🚀 Public Access
+The function is exposed via a Public Lambda Function URL.
+- **GET Parameter:** `city`
+- **Public URL:** [https://fa33f43dwsqrubjmifgm4k22u40gzowd.lambda-url.eu-north-1.on.aws/](https://fa33f43dwsqrubjmifgm4k22u40gzowd.lambda-url.eu-north-1.on.aws/?city=Wroclaw)
+
+---
 
 ## 🛠 Key Design Decisions
-- **Separation of Concerns:** Each component has a single, well-defined responsibility. The Lambda handler is limited to orchestration, the service manages the business flow, and the client handles infrastructure-specific communication.
-- **Hybrid Packaging (Layer & Feature-based):** The project structure uses a deliberate mix of layer-based packaging (e.g., `client`, `model`) and feature-grouping (`openmeteo`) This ensures high navigability, logical grouping of related components, and a clean project overview.
-- **Encapsulation of Provider DTOs:** External API structures are strictly isolated within the client layer. The raw Open-Meteo response models are mapped immediately to internal domain models, protecting the business logic from potential changes in the external API's JSON schema.
-- **Provider Abstraction & API Agnosticism:** The core application was decoupled from the specific weather provider using the `WeatherClient` interface. This allows for switching to a different provider without touching business logic and enables easy **Mocking** for unit tests.
-- **Manual Dependency Injection (ApplicationContext):** To optimize performance and manage component lifecycles, `ApplicationContext` was implemented. This ensures that heavy-duty objects like `HttpClient` and `ObjectMapper` are singletons and increases code maintainability.
-- **Strong Type Safety:** Instead of using Strings for data, Java **Enums** for Cities and Temperature Categories were used. This eliminates runtime errors caused by typos, ensures consistency across the entire system and increases code readability.
-- **Zero Magic Numbers & Strings:** All business-critical thresholds (temperature ranges) and technical configurations (timeouts, default units) are extracted into named constants (`private static final`), making the code self-documenting and maintainable.
-- **Boilerplate Reduction with Lombok:** Lombok annotations (`@Data`, `@Getter`, `@RequiredArgsConstructor`) were used to eliminate verbose boilerplate code. This keeps the codebase clean and allows the reviewer to focus on the actual architecture and logic.
+
+### 🏗 Architecture & Clean Code
+* **Decoupled Orchestration:** Uses a strict Separation of Concerns where the Lambda handler orchestrates, services manage business flow, and clients handle infrastructure.
+* **Centralized Configuration:** All technical constants are moved to a dedicated `AppConfig` class. This ensures that the parameters can be adjusted in one place without touching the business code.
+* **Manual DI & Performance:** A custom `ApplicationContext` manages singletons (`HttpClient`, `ObjectMapper`), optimizing Lambda cold-starts and component lifecycles without framework overhead.
+* **Strong Type Safety:** Eliminated "magic strings" and numbers using Java **Enums** and named constants, ensuring runtime stability and self-documenting code.
+
+### 🔌 Integration & Resilience
+* **API Agnosticism:** Core logic is decoupled from providers via `GeocodingClient` and `TemperatureClient` interfaces, allowing provider swaps (e.g., to AccuWeather) with zero impact on business logic.
+* **DTO Encapsulation:** External API schemas are strictly isolated; raw JSON responses are mapped immediately to internal Domain Models to protect the core from external changes.
+* **Resilient Communication:** Implementation of `HttpClientWrapper` with custom **Retry mechanisms**, read timeouts, and `Locale.US` formatting for cross-region coordinate consistency.
+* **Boilerplate Efficiency:** Leverages **Lombok** to minimize verbosity, keeping the focus on architectural patterns and logic rather than POJO ceremonies.
+
+---
+
+## 🏗 Project Structure
+- `app`: Lambda Handler and central ApplicationContext and configuration.
+- `client`: Infrastructure layer handling HTTP communication and URL encoding.
+- `service`: Business logic (orchestration and temperature classification).
+- `model`: Domain objects, DTOs, and Enums.
+- `exception`: Custom exception hierarchy for precise error mapping.
+
+---
 
 ## 🧰 Tools & Libraries
+
 - **Lombok:** Used to reduce boilerplate code (Getters, Builders, Constructors), keeping the data models clean and readable.
-- **Jackson:** Utilized for high-performance JSON serialization and deserialization, integrated with Java Enums.
-- **Static Analysis (SpotBugs & Checkstyle):** The project is configured to follow strict coding standards.
-    - **Checkstyle** ensures consistent code formatting and style.
-    - **SpotBugs** scans the bytecode to catch potential bugs and vulnerabilities before deployment.
+- **Jackson:** Utilized for JSON serialization and deserialization, integrated with Java Enums.
+- **Checkstyle** ensures consistent code formatting and style.
+- **SpotBugs** scans the bytecode to catch potential bugs and vulnerabilities before deployment.
 
-## 🧪 Unit Testing Strategy
-To test the solution without calling the real API, we use a **Mocking** strategy:
-1.  **Mocking the Client:** By mocking the `WeatherClient` interface, we can simulate various weather conditions.
-2.  **Logic Verification:** We inject the mock into `WeatherService` to verify if it correctly orchestrates the classification and returns the expected `WeatherResponse`.
-3.  **Isolated Classifier Tests:** The `TemperatureClassifier` is tested as a pure function, ensuring 100% coverage of all temperature ranges defined in the requirements.
+---
 
-## 📦 Building the project
-To compile, check code quality, and generate the deployable JAR:
+## 🧪 Testing & Validation
+
+### Unit Testing Strategy
+The architecture allows for full test coverage without real API calls:
+1. **Mocking Infrastructure:** Using Mockito to mock `GeocodingClient` and `TemperatureClient`.
+2. **Logic Isolation:** `TemperatureClassifier` is tested as a pure function to verify boundary cases (e.g., exactly 0°C, 10°C, 30°C).
+3. **Resilience Testing:** Simulating timeouts and 500 errors to verify retry logic.
+
+### Example Requests
+| Case | Example URL | Expected Result |
+| :--- | :--- | :--- |
+| **Standard City** | `.../?city=Wroclaw` | `200 OK` + JSON Response |
+| **City with Space** | `.../?city=New%20York` | `200 OK` (URL Encoded) |
+| **Missing Parameter**| `.../?city=` | `400 Bad Request` |
+
+---
+
+## 🧠 Design Reflection (Task 4)
+
+### Future-Proofing
+The current design heavily supports the addition of new weather providers through the **Strategy/Adapter pattern**. Adding a new provider only requires a new implementation of the `TemperatureClient` interface. Switching between them is a single-line change in the `ApplicationContext`.
+
+### Potential Improvements
+
+If I had more time to further develop this project, I would focus on the following enhancements:
+
+* **Provider Factory Implementation:** While the system uses interfaces, the specific client is currently hardcoded in the configuration. Implementing a **Factory Pattern** would allow dynamic selection of weather providers based on input parameters (e.g., `?city=London&provider=accuweather`).
+* **Enhanced Geocoding Precision:** Currently, the app picks the first result returned by the API (e.g., the most popular "Berlin"). A production-ready version should support additional parameters like country codes or states to handle cases where multiple cities share the same name across different regions.
+* **User-Centric Error Handling:** At the moment, detailed errors are logged in AWS CloudWatch for developers, but the end-user receives a generic error message. I would implement a global error handler to map exceptions into clean, user-friendly JSON responses.
+* **Full Test Coverage:** The architecture is fully prepared for testing (Separation of Concerns), but I would aim for 100% coverage, specifically including integration tests for complex network scenarios and edge cases.
+* **Integration & Security:** Currently, the Lambda is exposed via a public URL for simplicity. A production-grade evolution would involve integrating it with an existing ecosystem or a dedicated frontend, while securing the endpoint (e.g., via API Gateway with proper IAM/Cognito authorization) to observe its performance and behavior in a real-world environment.
+
+---
+
+## 📦 Building the project (maven wrapper included)
 ```bash
-mvn clean package
+./mvnw clean package
