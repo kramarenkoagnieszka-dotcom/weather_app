@@ -32,8 +32,10 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
     }
     Map<String, String> queryParams = extractQueryParams(input);
     if (queryParams.isEmpty() || !queryParams.containsKey(AppConfig.QUERY_PARAM)
-        || queryParams.get(AppConfig.QUERY_PARAM) == null || queryParams.get(AppConfig.QUERY_PARAM).isBlank()) {
-      throw new MissingParameterException(String.format("Missing required parameter: '%s'", AppConfig.QUERY_PARAM));
+        || queryParams.get(AppConfig.QUERY_PARAM) == null || queryParams.get(AppConfig.QUERY_PARAM)
+        .isBlank()) {
+      throw new MissingParameterException(
+          String.format("Missing required parameter: '%s'", AppConfig.QUERY_PARAM));
     }
   }
 
@@ -68,6 +70,7 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
 
   @FunctionalInterface
   private interface WeatherAction {
+
     WeatherResponse execute() throws Exception;
   }
 }
