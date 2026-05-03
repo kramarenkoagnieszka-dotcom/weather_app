@@ -51,13 +51,17 @@ The architecture allows for full test coverage without real API calls:
 2. **Logic Isolation:** `TemperatureClassifier` is tested as a pure function to verify boundary cases (e.g., exactly 0°C, 10°C, 30°C).
 3. **Resilience Testing:** Simulating timeouts and 500 errors to verify retry logic.
 
-### Example Requests
-| Case | Example URL | Expected Result |
-| :--- | :--- | :--- |
-| **Standard City** | `.../?city=Wroclaw` | `200 OK` + JSON Response |
-| **City with Space** | `.../?city=New%20York` | `200 OK` (URL Encoded) |
-| **Missing Parameter**| `.../?city=` | `400 Bad Request` |
+### Example Requests and Responses
 
+Below are real examples of calls to the Public Lambda URL and the structured JSON responses returned by the service:
+
+| Location     | Example URL | Sample JSON Response | Category |
+|:-------------| :--- | :--- | :--- |
+| **Wroclaw**  | [Link](https://fa33f43dwsqrubjmifgm4k22u40gzowd.lambda-url.eu-north-1.on.aws/?city=Wroclaw) | `{"unit":"CELSIUS","city":"Wroclaw","temperature":23.7,"category":"WARM"}` | **Warm** |
+| **Tokyo**    | [Link](https://fa33f43dwsqrubjmifgm4k22u40gzowd.lambda-url.eu-north-1.on.aws/?city=Tokyo) | `{"unit":"CELSIUS","city":"Tokyo","temperature":19.7,"category":"MILD"}` | **Mild** |
+| **Nuuk**     | [Link](https://fa33f43dwsqrubjmifgm4k22u40gzowd.lambda-url.eu-north-1.on.aws/?city=Nuuk) | `{"unit":"CELSIUS","city":"Nuuk","temperature":0.8,"category":"COLD"}` | **Cold** |
+| **Kugaaruk** | [Link](https://fa33f43dwsqrubjmifgm4k22u40gzowd.lambda-url.eu-north-1.on.aws/?city=kugaaruk) | `{"unit":"CELSIUS","city":"Kugaaruk","temperature":-10.7,"category":"FREEZING"}` | **Freezing** |
+| **Dubai**    | [Link](https://fa33f43dwsqrubjmifgm4k22u40gzowd.lambda-url.eu-north-1.on.aws/?city=Dubai) | `{"unit":"CELSIUS","city":"Dubai","temperature":41.3,"category":"HOT"}` | **Hot** |
 ---
 
 ## 🧠 Design Reflection (Task 4)
