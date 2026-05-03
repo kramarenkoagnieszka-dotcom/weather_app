@@ -31,8 +31,8 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
       throw new MissingParameterException("Input cannot be null");
     }
     Map<String, String> queryParams = extractQueryParams(input);
-    if (queryParams.isEmpty() || !queryParams.containsKey(AppConfig.QUERY_PARAM) ||
-        queryParams.get(AppConfig.QUERY_PARAM) == null || queryParams.get(AppConfig.QUERY_PARAM).isBlank()) {
+    if (queryParams.isEmpty() || !queryParams.containsKey(AppConfig.QUERY_PARAM)
+        || queryParams.get(AppConfig.QUERY_PARAM) == null || queryParams.get(AppConfig.QUERY_PARAM).isBlank()) {
       throw new MissingParameterException(String.format("Missing required parameter: '%s'", AppConfig.QUERY_PARAM));
     }
   }
@@ -44,7 +44,9 @@ public class WeatherQueryHandler implements RequestHandler<Map<String, Object>, 
 
   private WeatherResponse executeSafely(Context context, WeatherAction action) {
     try {
-      if (context != null) context.getLogger().log("Processing weather request...");
+      if (context != null) {
+        context.getLogger().log("Processing weather request...");
+      }
       return action.execute();
     } catch (MissingParameterException e) {
       logError(context, "Validation error: ", e);

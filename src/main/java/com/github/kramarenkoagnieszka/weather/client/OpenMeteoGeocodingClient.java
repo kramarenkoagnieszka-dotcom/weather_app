@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kramarenkoagnieszka.weather.app.AppConfig;
 import com.github.kramarenkoagnieszka.weather.exception.GeocodingClientException;
 import com.github.kramarenkoagnieszka.weather.model.City;
-import com.github.kramarenkoagnieszka.weather.model.CityRequest;
 
 import com.github.kramarenkoagnieszka.weather.model.WeatherRequest;
 import java.io.IOException;
