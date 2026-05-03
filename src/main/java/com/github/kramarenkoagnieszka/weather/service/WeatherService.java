@@ -3,7 +3,7 @@ package com.github.kramarenkoagnieszka.weather.service;
 import com.github.kramarenkoagnieszka.weather.client.GeocodingClient;
 import com.github.kramarenkoagnieszka.weather.client.TemperatureClient;
 import com.github.kramarenkoagnieszka.weather.model.City;
-import com.github.kramarenkoagnieszka.weather.model.CityRequest;
+import com.github.kramarenkoagnieszka.weather.model.WeatherRequest;
 import com.github.kramarenkoagnieszka.weather.model.WeatherResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -14,8 +14,8 @@ public class WeatherService {
   private final TemperatureClient temperatureClient;
   private final TemperatureClassifier classifier;
 
-  public WeatherResponse getWeather(CityRequest cityRequest) {
-    City city = geocodingClient.getCity(cityRequest);
+  public WeatherResponse getWeather(WeatherRequest weatherRequest) {
+    City city = geocodingClient.getCity(weatherRequest);
 
     double temp = temperatureClient.getTemperature(city);
 

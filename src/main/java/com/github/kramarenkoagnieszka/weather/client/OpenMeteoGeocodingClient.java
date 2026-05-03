@@ -7,6 +7,7 @@ import com.github.kramarenkoagnieszka.weather.exception.GeocodingClientException
 import com.github.kramarenkoagnieszka.weather.model.City;
 import com.github.kramarenkoagnieszka.weather.model.CityRequest;
 
+import com.github.kramarenkoagnieszka.weather.model.WeatherRequest;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -33,8 +34,8 @@ public class OpenMeteoGeocodingClient implements GeocodingClient {
   }
 
   @Override
-  public City getCity(CityRequest cityRequest) {
-    HttpResponse<String> response = fetchRawData(cityRequest);
+  public City getCity(WeatherRequest weatherRequest) {
+    HttpResponse<String> response = fetchRawData(weatherRequest);
 
     if (response.statusCode() == 400) {
       String reason = extractReason(response.body());
@@ -50,7 +51,7 @@ public class OpenMeteoGeocodingClient implements GeocodingClient {
     JsonNode results = root.path(NODE_RESULTS);
 
     if (results.isMissingNode() || !results.isArray() || results.isEmpty()) {
-      throw new GeocodingClientException("City not found: " + cityRequest.getName());
+      throw new GeocodingClientException("City not found: " + weatherRequest.getCity());
     }
 
     JsonNode firstResult = results.get(0);
@@ -61,7 +62,7 @@ public class OpenMeteoGeocodingClient implements GeocodingClient {
     if (Double.isNaN(lat) || Double.isNaN(lon)) {
       throw new GeocodingClientException(
           String.format("Geocoding result missing valid coordinates (%s/%s) for: %s",
-              NODE_LATITUDE, NODE_LONGITUDE, cityRequest.getName()));
+              NODE_LATITUDE, NODE_LONGITUDE, weatherRequest.getCity()));
     }
 
     return new City(
@@ -71,8 +72,8 @@ public class OpenMeteoGeocodingClient implements GeocodingClient {
     );
   }
 
-  private HttpResponse<String> fetchRawData(CityRequest cityRequest) {
-    String encodedCity = URLEncoder.encode(cityRequest.getName(), StandardCharsets.UTF_8);
+  private HttpResponse<String> fetchRawData(WeatherRequest weatherRequest) {
+    String encodedCity = URLEncoder.encode(weatherRequest.getCity(), StandardCharsets.UTF_8);
     String url = String.format(GEO_URL, encodedCity);
 
     HttpRequest request = HttpRequest.newBuilder()
