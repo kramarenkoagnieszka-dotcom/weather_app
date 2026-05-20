@@ -13,4 +13,17 @@ public enum TemperatureCategory {
   HOT(Double.MAX_VALUE);
 
   private final double upperThreshold;
+
+  static {
+    TemperatureCategory[] values = values();
+    for (int i = 1; i < values.length; i++) {
+      if (values[i].upperThreshold <= values[i - 1].upperThreshold) {
+        throw new IllegalStateException(String.format(
+            "TemperatureCategory enum is not in ascending order: %s (%.1f) must be > %s (%.1f)",
+            values[i].name(), values[i].upperThreshold,
+            values[i - 1].name(), values[i - 1].upperThreshold
+        ));
+      }
+    }
+  }
 }
