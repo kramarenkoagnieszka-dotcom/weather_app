@@ -1,6 +1,6 @@
 package com.github.kramarenkoagnieszka.weather.exception;
 
-public class GeocodingUpstreamException extends RuntimeException {
+public class GeocodingUpstreamException extends WeatherApplicationException {
 
   public GeocodingUpstreamException(String message) {
     super(message);

@@ -1,6 +1,6 @@
 package com.github.kramarenkoagnieszka.weather.exception;
 
-public class WeatherUpstreamException extends RuntimeException {
+public class WeatherUpstreamException extends WeatherApplicationException {
 
   public WeatherUpstreamException(String message, Throwable cause) {
     super(message, cause);

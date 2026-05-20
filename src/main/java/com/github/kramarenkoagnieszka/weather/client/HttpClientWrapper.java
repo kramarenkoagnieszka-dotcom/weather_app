@@ -19,23 +19,26 @@ public class HttpClientWrapper {
   public HttpResponse<String> sendWithRetry(HttpRequest request) {
     int maxRetries = AppConfig.DEFAULT_RETRIES;
 
-    HttpRequest timedRequest = HttpRequest.newBuilder(request.uri())
+    HttpRequest.Builder builder = HttpRequest.newBuilder(request.uri())
         .timeout(Duration.ofSeconds(AppConfig.HTTP_READ_TIMEOUT_SECONDS))
         .method(
             request.method(),
             request.bodyPublisher().orElse(HttpRequest.BodyPublishers.noBody())
-        )
-        .build();
+        );
+
+    HttpRequest timedRequest = builder.build();
 
     int attempt = 0;
     Exception lastException = null;
 
     while (attempt < maxRetries) {
       try {
-        HttpResponse<String> response = httpClient.send(timedRequest, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = httpClient.send(timedRequest,
+            HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() == 500) {
-          lastException = new HttpServerException("Server returned status 500");
+        int status = response.statusCode();
+        if (status == 500 || status == 502 || status == 503 || status == 504) {
+          lastException = new HttpServerException("Server returned status " + status);
         } else {
           return response;
         }
