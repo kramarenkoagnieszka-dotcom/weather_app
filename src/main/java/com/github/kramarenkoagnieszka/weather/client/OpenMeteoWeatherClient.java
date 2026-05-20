@@ -2,8 +2,8 @@ package com.github.kramarenkoagnieszka.weather.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.kramarenkoagnieszka.weather.app.AppConfig;
 import com.github.kramarenkoagnieszka.weather.exception.WeatherClientException;
+import com.github.kramarenkoagnieszka.weather.exception.WeatherUpstreamException;
 import com.github.kramarenkoagnieszka.weather.model.City;
 
 import java.io.IOException;
@@ -29,36 +29,48 @@ public class OpenMeteoWeatherClient implements TemperatureClient {
 
   @Override
   public double getTemperature(City city) {
-    JsonNode root = fetchData(city);
+    HttpResponse<String> response = fetchRawData(city);
+
+    if (response.statusCode() == 400) {
+      throw new WeatherClientException(
+          "Weather API rejected request for coordinates: "
+              + city.getLatitude() + "," + city.getLongitude());
+    }
+
+    if (response.statusCode() != 200) {
+      throw new WeatherUpstreamException(
+          "Unexpected Weather API status: " + response.statusCode());
+    }
+
+    JsonNode root = parseJson(response.body());
     JsonNode temperatureNode = root.path(NODE_CURRENT).path(NODE_TEMPERATURE);
 
     if (temperatureNode.isMissingNode()) {
-      throw new WeatherClientException(
-          String.format("Invalid response: '%s.%s' data is missing", NODE_CURRENT,
-              NODE_TEMPERATURE));
+      throw new WeatherUpstreamException(
+          String.format("Invalid response: '%s.%s' data is missing",
+              NODE_CURRENT, NODE_TEMPERATURE));
     }
+
     return temperatureNode.asDouble();
   }
 
-  private JsonNode fetchData(City city) {
-    String url = String.format(Locale.US, OPEN_METEO_URL, city.getLatitude(), city.getLongitude());
+  private HttpResponse<String> fetchRawData(City city) {
+    String url = String.format(Locale.US, OPEN_METEO_URL,
+        city.getLatitude(), city.getLongitude());
 
     HttpRequest request = HttpRequest.newBuilder()
         .uri(URI.create(url))
         .GET()
         .build();
 
-    HttpResponse<String> response = httpClientWrapper.sendWithRetry(request,
-        AppConfig.DEFAULT_RETRIES);
+    return httpClientWrapper.sendWithRetry(request);
+  }
 
-    if (response.statusCode() != 200) {
-      throw new WeatherClientException("Open-Meteo returned error code: " + response.statusCode());
-    }
-
+  private JsonNode parseJson(String jsonBody) {
     try {
-      return objectMapper.readTree(response.body());
+      return objectMapper.readTree(jsonBody);
     } catch (IOException e) {
-      throw new WeatherClientException("Failed to parse weather data from Open-Meteo", e);
+      throw new WeatherUpstreamException("Failed to parse weather response body", e);
     }
   }
 }

@@ -1,7 +1,8 @@
 package com.github.kramarenkoagnieszka.weather.client;
 
 import com.github.kramarenkoagnieszka.weather.app.AppConfig;
-import com.github.kramarenkoagnieszka.weather.exception.WeatherClientException;
+import com.github.kramarenkoagnieszka.weather.exception.HttpClientWrapperException;
+import com.github.kramarenkoagnieszka.weather.exception.HttpServerException;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +16,9 @@ public class HttpClientWrapper {
 
   private final HttpClient httpClient;
 
-  public HttpResponse<String> sendWithRetry(HttpRequest request, int retries) {
+  public HttpResponse<String> sendWithRetry(HttpRequest request) {
+    int maxRetries = AppConfig.DEFAULT_RETRIES;
+
     HttpRequest timedRequest = HttpRequest.newBuilder(request.uri())
         .timeout(Duration.ofSeconds(AppConfig.HTTP_READ_TIMEOUT_SECONDS))
         .method(
@@ -27,20 +30,27 @@ public class HttpClientWrapper {
     int attempt = 0;
     Exception lastException = null;
 
-    while (attempt < retries) {
+    while (attempt < maxRetries) {
       try {
-        return httpClient.send(timedRequest, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = httpClient.send(timedRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 500) {
+          lastException = new HttpServerException("Server returned status 500");
+        } else {
+          return response;
+        }
+
       } catch (IOException e) {
         lastException = e;
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
-        throw new WeatherClientException("HTTP request execution was interrupted", e);
+        throw new HttpClientWrapperException("HTTP request execution was interrupted", e);
       }
       attempt++;
     }
 
-    throw new WeatherClientException(
-        String.format("HTTP request failed after %d attempts", retries),
+    throw new HttpClientWrapperException(
+        String.format("HTTP request failed after %d attempts", maxRetries),
         lastException
     );
   }
