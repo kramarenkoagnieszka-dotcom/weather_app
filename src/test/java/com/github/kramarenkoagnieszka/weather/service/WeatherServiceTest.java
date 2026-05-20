@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import com.github.kramarenkoagnieszka.weather.client.GeocodingClient;
 import com.github.kramarenkoagnieszka.weather.client.TemperatureClient;
 import com.github.kramarenkoagnieszka.weather.model.City;
+import com.github.kramarenkoagnieszka.weather.model.Temperature;
 import com.github.kramarenkoagnieszka.weather.model.TemperatureCategory;
 import com.github.kramarenkoagnieszka.weather.model.Unit;
 import com.github.kramarenkoagnieszka.weather.model.WeatherRequest;
@@ -47,8 +48,9 @@ class WeatherServiceTest {
     WeatherResponse response = weatherService.getWeather(request);
 
     assertThat(response.getCategory()).isEqualTo(TemperatureCategory.WARM);
-    assertThat(response.getTemperature()).isEqualTo(25.0);
-    assertThat(response.getUnit()).isEqualTo(Unit.CELSIUS);
+    assertThat(response.getTemperature()).isEqualTo(new Temperature(25.0, Unit.CELSIUS));
+    assertThat(response.getTemperature().getValue()).isEqualTo(25.0);
+    assertThat(response.getTemperature().getUnit()).isEqualTo(Unit.CELSIUS);
   }
 
   @Test

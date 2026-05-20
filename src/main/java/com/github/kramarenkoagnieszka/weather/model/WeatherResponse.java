@@ -6,7 +6,6 @@ import lombok.Value;
 public class WeatherResponse {
 
   String city;
-  double temperature;
-  Unit unit;
+  Temperature temperature;
   TemperatureCategory category;
 }

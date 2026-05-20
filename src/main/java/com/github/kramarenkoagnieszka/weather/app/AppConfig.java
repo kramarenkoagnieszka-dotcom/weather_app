@@ -6,7 +6,6 @@ public final class AppConfig {
   }
 
   // API Request Keys
-  public static final String QUERY_PARAMS_KEY = "queryStringParameters";
   public static final String QUERY_PARAM = "city";
 
   // HTTP Client Settings
