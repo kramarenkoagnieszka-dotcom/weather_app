@@ -2,11 +2,11 @@ package com.github.kramarenkoagnieszka.weather.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.kramarenkoagnieszka.weather.app.AppConfig;
 import com.github.kramarenkoagnieszka.weather.exception.GeocodingClientException;
+import com.github.kramarenkoagnieszka.weather.exception.GeocodingUpstreamException;
 import com.github.kramarenkoagnieszka.weather.model.City;
-
 import com.github.kramarenkoagnieszka.weather.model.WeatherRequest;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -38,12 +38,12 @@ public class OpenMeteoGeocodingClient implements GeocodingClient {
 
     if (response.statusCode() == 400) {
       String reason = extractReason(response.body());
-      throw new GeocodingClientException("Geocoding API error: " + reason);
+      throw new GeocodingClientException("Geocoding API rejected request: " + reason);
     }
 
     if (response.statusCode() != 200) {
-      throw new GeocodingClientException(
-          "Unexpected Geocoding API error. Status: " + response.statusCode());
+      throw new GeocodingUpstreamException(
+          "Unexpected Geocoding API status: " + response.statusCode());
     }
 
     JsonNode root = parseJson(response.body());
@@ -54,12 +54,11 @@ public class OpenMeteoGeocodingClient implements GeocodingClient {
     }
 
     JsonNode firstResult = results.get(0);
-
     double lat = firstResult.path(NODE_LATITUDE).asDouble(Double.NaN);
     double lon = firstResult.path(NODE_LONGITUDE).asDouble(Double.NaN);
 
     if (Double.isNaN(lat) || Double.isNaN(lon)) {
-      throw new GeocodingClientException(
+      throw new GeocodingUpstreamException(
           String.format("Geocoding result missing valid coordinates (%s/%s) for: %s",
               NODE_LATITUDE, NODE_LONGITUDE, weatherRequest.getCity()));
     }
@@ -80,7 +79,7 @@ public class OpenMeteoGeocodingClient implements GeocodingClient {
         .GET()
         .build();
 
-    return httpClientWrapper.sendWithRetry(request, AppConfig.DEFAULT_RETRIES);
+    return httpClientWrapper.sendWithRetry(request);
   }
 
   private String extractReason(String jsonBody) {
@@ -95,7 +94,7 @@ public class OpenMeteoGeocodingClient implements GeocodingClient {
     try {
       return objectMapper.readTree(jsonBody);
     } catch (IOException e) {
-      throw new GeocodingClientException("Failed to parse geocoding response body", e);
+      throw new GeocodingUpstreamException("Failed to parse geocoding response body", e);
     }
   }
 }

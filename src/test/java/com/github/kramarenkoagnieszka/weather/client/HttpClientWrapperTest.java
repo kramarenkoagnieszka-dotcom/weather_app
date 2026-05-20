@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.github.kramarenkoagnieszka.weather.exception.WeatherClientException;
+import com.github.kramarenkoagnieszka.weather.exception.HttpClientWrapperException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -37,7 +37,7 @@ class HttpClientWrapperTest {
     when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
         .thenReturn(httpResponse);
 
-    HttpResponse<String> result = httpClientWrapper.sendWithRetry(request, 3);
+    HttpResponse<String> result = httpClientWrapper.sendWithRetry(request);
 
     assertThat(result).isEqualTo(httpResponse);
     verify(httpClient, times(1)).send(any(), any()); // Sprawdzamy, czy wywołano tylko raz
@@ -52,7 +52,7 @@ class HttpClientWrapperTest {
         .thenThrow(new IOException("Network down"))
         .thenReturn(httpResponse);
 
-    HttpResponse<String> result = httpClientWrapper.sendWithRetry(request, 3);
+    HttpResponse<String> result = httpClientWrapper.sendWithRetry(request);
 
     assertThat(result).isEqualTo(httpResponse);
     verify(httpClient, times(2)).send(any(), any()); // Potwierdzamy, że był retry!
@@ -67,8 +67,8 @@ class HttpClientWrapperTest {
     when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
         .thenThrow(new IOException("Permanent failure"));
 
-    assertThatThrownBy(() -> httpClientWrapper.sendWithRetry(request, maxRetries))
-        .isInstanceOf(WeatherClientException.class)
+    assertThatThrownBy(() -> httpClientWrapper.sendWithRetry(request))
+        .isInstanceOf(HttpClientWrapperException.class)
         .hasMessageContaining("failed after 3 attempts");
 
     verify(httpClient, times(maxRetries)).send(any(), any());

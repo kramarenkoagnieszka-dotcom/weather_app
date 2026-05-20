@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 import com.github.kramarenkoagnieszka.weather.client.GeocodingClient;
 import com.github.kramarenkoagnieszka.weather.client.TemperatureClient;
 import com.github.kramarenkoagnieszka.weather.model.City;
+import com.github.kramarenkoagnieszka.weather.model.TemperatureCategory;
+import com.github.kramarenkoagnieszka.weather.model.Unit;
 import com.github.kramarenkoagnieszka.weather.model.WeatherRequest;
 import com.github.kramarenkoagnieszka.weather.model.WeatherResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +25,8 @@ class WeatherServiceTest {
 
   @Mock
   private TemperatureClient temperatureClient;
-  private TemperatureClassifier classifier = new TemperatureClassifier();
+
+  private final TemperatureClassifier classifier = new TemperatureClassifier();
 
   private WeatherService weatherService;
 
@@ -43,8 +46,9 @@ class WeatherServiceTest {
 
     WeatherResponse response = weatherService.getWeather(request);
 
-    assertThat(response.getCategory()).isEqualTo("WARM"); // Bo 25 < 30.0 (UpperThreshold WARM)
+    assertThat(response.getCategory()).isEqualTo(TemperatureCategory.WARM);
     assertThat(response.getTemperature()).isEqualTo(25.0);
+    assertThat(response.getUnit()).isEqualTo(Unit.CELSIUS);
   }
 
   @Test
@@ -58,6 +62,6 @@ class WeatherServiceTest {
 
     WeatherResponse response = weatherService.getWeather(request);
 
-    assertThat(response.getCategory()).isEqualTo("FREEZING");
+    assertThat(response.getCategory()).isEqualTo(TemperatureCategory.FREEZING);
   }
 }

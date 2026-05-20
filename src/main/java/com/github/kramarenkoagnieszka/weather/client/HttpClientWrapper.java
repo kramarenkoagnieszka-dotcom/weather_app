@@ -1,7 +1,8 @@
 package com.github.kramarenkoagnieszka.weather.client;
 
 import com.github.kramarenkoagnieszka.weather.app.AppConfig;
-import com.github.kramarenkoagnieszka.weather.exception.WeatherClientException;
+import com.github.kramarenkoagnieszka.weather.exception.HttpClientWrapperException;
+import com.github.kramarenkoagnieszka.weather.exception.HttpServerException;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 
@@ -15,32 +16,44 @@ public class HttpClientWrapper {
 
   private final HttpClient httpClient;
 
-  public HttpResponse<String> sendWithRetry(HttpRequest request, int retries) {
-    HttpRequest timedRequest = HttpRequest.newBuilder(request.uri())
+  public HttpResponse<String> sendWithRetry(HttpRequest request) {
+    int maxRetries = AppConfig.DEFAULT_RETRIES;
+
+    HttpRequest.Builder builder = HttpRequest.newBuilder(request.uri())
         .timeout(Duration.ofSeconds(AppConfig.HTTP_READ_TIMEOUT_SECONDS))
         .method(
             request.method(),
             request.bodyPublisher().orElse(HttpRequest.BodyPublishers.noBody())
-        )
-        .build();
+        );
+
+    HttpRequest timedRequest = builder.build();
 
     int attempt = 0;
     Exception lastException = null;
 
-    while (attempt < retries) {
+    while (attempt < maxRetries) {
       try {
-        return httpClient.send(timedRequest, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = httpClient.send(timedRequest,
+            HttpResponse.BodyHandlers.ofString());
+
+        int status = response.statusCode();
+        if (status == 500 || status == 502 || status == 503 || status == 504) {
+          lastException = new HttpServerException("Server returned status " + status);
+        } else {
+          return response;
+        }
+
       } catch (IOException e) {
         lastException = e;
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
-        throw new WeatherClientException("HTTP request execution was interrupted", e);
+        throw new HttpClientWrapperException("HTTP request execution was interrupted", e);
       }
       attempt++;
     }
 
-    throw new WeatherClientException(
-        String.format("HTTP request failed after %d attempts", retries),
+    throw new HttpClientWrapperException(
+        String.format("HTTP request failed after %d attempts", maxRetries),
         lastException
     );
   }
